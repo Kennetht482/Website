@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Image Gallery</title>
+  <link rel="stylesheet" href="assets/styles.css" />
+</head>
+<body>
+  <header class="site-header">
+    <h1>My Image Gallery</h1>
+    <p class="subtitle">Add images to the /images/ folder and register them in images.json</p>
+    <nav><a href="README.html">How to add images</a></nav>
+  </header>
+
+  <main>
+    <section id="gallery" class="gallery" aria-live="polite"></section>
+
+    <template id="card-template">
+      <figure class="card">
+        <img alt="" loading="lazy">
+        <figcaption>
+          <strong class="title"></strong>
+          <p class="caption"></p>
+        </figcaption>
+      </figure>
+    </template>
+  </main>
+
+  <footer class="site-footer">
+    <p>Hosted on GitHub Pages • Edit images by uploading to /images/ and updating images.json</p>
+  </footer>
+
+  <script>
+    async function loadImages() {
+      try {
+        const res = await fetch('images.json', {cache: 'no-store'});
+        if (!res.ok) throw new Error('images.json not found or network error');
+        const images = await res.json();
+        const gallery = document.getElementById('gallery');
+        const tpl = document.getElementById('card-template');
+
+        if (!Array.isArray(images) || images.length === 0) {
+          gallery.innerHTML = '<p class="empty">No images yet. See README to add images.</p>';
+          return;
+        }
+
+        gallery.innerHTML = '';
+        for (const img of images) {
+          const node = tpl.content.cloneNode(true);
+          const imgEl = node.querySelector('img');
+          const titleEl = node.querySelector('.title');
+          const captionEl = node.querySelector('.caption');
+
+          imgEl.src = img.file;
+          imgEl.alt = img.alt || img.title || '';
+          titleEl.textContent = img.title || '';
+          captionEl.textContent = img.caption || '';
+
+          gallery.appendChild(node);
+        }
+      } catch (err) {
+        document.getElementById('gallery').innerHTML = '<p class="error">Error loading gallery: ' + err.message + '</p>';
+        console.error(err);
+      }
+    }
+
+    loadImages();
+  </script>
+</body>
+</html>
