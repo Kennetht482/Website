@@ -3,20 +3,20 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Image Gallery</title>
+  <title>Media Gallery</title>
   <link rel="stylesheet" href="assets/styles.css" />
 </head>
 <body>
   <header class="site-header">
-    <h1>My Image Gallery</h1>
-    <p class="subtitle">Add images to the /images/ folder and register them in images.json</p>
-    <nav><a href="README.html">How to add images</a></nav>
+    <h1>My Media Gallery</h1>
+    <p class="subtitle">Add images or audio to the /images/ folder and register them in images.json</p>
+    <nav><a href="README.html">How to add media</a></nav>
   </header>
 
   <main>
     <section id="gallery" class="gallery" aria-live="polite"></section>
 
-    <template id="card-template">
+    <template id="image-card-template">
       <figure class="card">
         <img alt="" loading="lazy">
         <figcaption>
@@ -25,39 +25,87 @@
         </figcaption>
       </figure>
     </template>
+
+    <template id="audio-card-template">
+      <figure class="card audio-card">
+        <div class="audio-media">
+          <audio controls preload="none"></audio>
+        </div>
+        <figcaption>
+          <strong class="title"></strong>
+          <p class="caption"></p>
+          <p class="audio-meta"><a class="download-link" target="_blank" rel="noopener">Download</a></p>
+        </figcaption>
+      </figure>
+    </template>
   </main>
 
   <footer class="site-footer">
-    <p>Hosted on GitHub Pages • Edit images by uploading to /images/ and updating images.json</p>
+    <p>Hosted on GitHub Pages • Edit media by uploading to /images/ and updating images.json</p>
   </footer>
 
   <script>
-    async function loadImages() {
+    async function loadMedia() {
       try {
         const res = await fetch('images.json', {cache: 'no-store'});
         if (!res.ok) throw new Error('images.json not found or network error');
-        const images = await res.json();
+        const items = await res.json();
         const gallery = document.getElementById('gallery');
-        const tpl = document.getElementById('card-template');
+        const imgTpl = document.getElementById('image-card-template');
+        const audioTpl = document.getElementById('audio-card-template');
 
-        if (!Array.isArray(images) || images.length === 0) {
-          gallery.innerHTML = '<p class="empty">No images yet. See README to add images.</p>';
+        if (!Array.isArray(items) || items.length === 0) {
+          gallery.innerHTML = '<p class="empty">No media yet. See README to add images or audio.</p>';
           return;
         }
 
         gallery.innerHTML = '';
-        for (const img of images) {
-          const node = tpl.content.cloneNode(true);
-          const imgEl = node.querySelector('img');
-          const titleEl = node.querySelector('.title');
-          const captionEl = node.querySelector('.caption');
+        for (const it of items) {
+          // default type to image for backward compatibility
+          const type = (it.type || 'image').toLowerCase();
 
-          imgEl.src = img.file;
-          imgEl.alt = img.alt || img.title || '';
-          titleEl.textContent = img.title || '';
-          captionEl.textContent = img.caption || '';
+          if (type === 'audio') {
+            const node = audioTpl.content.cloneNode(true);
+            const audioEl = node.querySelector('audio');
+            const titleEl = node.querySelector('.title');
+            const captionEl = node.querySelector('.caption');
+            const downloadLink = node.querySelector('.download-link');
 
-          gallery.appendChild(node);
+            audioEl.src = it.file;
+            audioEl.setAttribute('aria-label', it.title || it.caption || 'Audio');
+            audioEl.title = it.title || '';
+            // set track or transcript link if provided (optional)
+            if (it.transcript) {
+              const tlink = document.createElement('a');
+              tlink.href = it.transcript;
+              tlink.textContent = 'Transcript';
+              tlink.target = '_blank';
+              tlink.rel = 'noopener';
+              captionEl.appendChild(document.createElement('br'));
+              captionEl.appendChild(tlink);
+            }
+
+            titleEl.textContent = it.title || '';
+            captionEl.appendChild(document.createTextNode(it.caption || ''));
+
+            downloadLink.href = it.file;
+            downloadLink.textContent = 'Download';
+
+            gallery.appendChild(node);
+          } else {
+            // treat anything else as image
+            const node = imgTpl.content.cloneNode(true);
+            const imgEl = node.querySelector('img');
+            const titleEl = node.querySelector('.title');
+            const captionEl = node.querySelector('.caption');
+
+            imgEl.src = it.file;
+            imgEl.alt = it.alt || it.title || '';
+            titleEl.textContent = it.title || '';
+            captionEl.textContent = it.caption || '';
+
+            gallery.appendChild(node);
+          }
         }
       } catch (err) {
         document.getElementById('gallery').innerHTML = '<p class="error">Error loading gallery: ' + err.message + '</p>';
@@ -65,7 +113,7 @@
       }
     }
 
-    loadImages();
+    loadMedia();
   </script>
 </body>
 </html>
