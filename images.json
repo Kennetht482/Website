@@ -7,10 +7,10 @@
     "alt": "An example placeholder image"
   },
   {
-    "file": "images/sample-audio.mp3",
+    "file": "images/WuZetian by the Fiechters.mp4a",
     "type": "audio",
-    "title": "Sample audio",
-    "caption": "A short sample clip",
+    "title": "WuZetian by the Fiechters",
+    "caption": "audio1",
     "transcript": "images/sample-audio-transcript.txt"
   }
 ]
