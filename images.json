@@ -1,8 +1,16 @@
 [
   {
     "file": "images/example.jpg",
+    "type": "image",
     "title": "Example image",
     "caption": "Replace this with your caption",
     "alt": "An example placeholder image"
+  },
+  {
+    "file": "images/sample-audio.mp3",
+    "type": "audio",
+    "title": "Sample audio",
+    "caption": "A short sample clip",
+    "transcript": "images/sample-audio-transcript.txt"
   }
 ]
